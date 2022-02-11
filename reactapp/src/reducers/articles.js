@@ -14,7 +14,7 @@ export default function(wishList = [], action){
         if(!findArticle){
             wishListCopy.push(action.articleLiked)
         }
-        
+        console.log('wishListCopy',wishListCopy);
         return wishListCopy
     } else if(action.type == 'deleteArticle'){
         var wishListCopy = [...wishList]
