@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import './App.css';
 import { Card, Icon, Modal} from 'antd';
 import Nav from './Nav'
@@ -11,6 +11,24 @@ function ScreenMyArticles(props) {
   const [visible, setVisible] = useState(false)
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [wishlistSave, setWishlistSave] = useState([])
+
+  useEffect(() => {
+
+    async function loadData() {
+      const response = await fetch('/articlestolist', {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: `token=${props.token}`
+      })
+
+      const articlesJson = await response.json();
+      console.log('articlesJson', articlesJson);
+      setWishlistSave(articlesJson.userFindArticle)
+
+    }
+    loadData();    
+  },[])
 
 
 
@@ -114,7 +132,8 @@ function ScreenMyArticles(props) {
 }
 
 function mapStateToProps(state){
-  return {myArticles: state.wishList}
+  console.log('state',state);
+  return {myArticles: state.wishList, token: state.token}
 }
 
 function mapDispatchToProps(dispatch){

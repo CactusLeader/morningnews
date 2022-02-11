@@ -6,6 +6,7 @@ var bcrypt = require('bcrypt');
 
 var userModel = require('../models/users');
 const req = require('express/lib/request');
+var articlesModel = require('../models/myArticles')
 
 
 router.post('/sign-up', async function(req,res,next){
@@ -123,5 +124,45 @@ router.post('/user-language', async (req, res, next) => {
 
   res.json({ result, langue });
 })
+
+router.post('/screenmyarticles', async function(req,res,next){
+
+  console.log('/screenmyarticles req.body', req.body);
+
+  const userFind = await userModel.findOne({
+    token: req.body.token
+  })
+  console.log('userFind', userFind);
+
+  var newArticle = new articlesModel({
+    img: req.body.urlToImage,
+    title: req.body.title,
+    description: req.body.description,
+    userId: userFind._id
+  })
+  console.log('newArticle', newArticle);
+ 
+  var saveArticle = await newArticle.save()
+  console.log('saveArticle', saveArticle);
+
+  res.json({ saveArticle: saveArticle })
+})
+
+router.post('/articlestolist', async function(req,res,next){
+
+  console.log('/articlestolist req.body', req.body);
+
+  var userFind = await userModel.findOne({
+    token: req.body.token
+  })
+  console.log('/articlestolist userFind', userFind);
+
+  var userFindArticle = await articlesModel.find({ userId: userFind._id });
+  console.log('/articlestolist userFindArticle', userFindArticle);
+
+  res.json({userFind, userFindArticle: userFindArticle })
+})
+
+
 
 module.exports = router;
