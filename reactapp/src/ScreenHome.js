@@ -28,7 +28,7 @@ function ScreenHome(props) {
 
     const body = await data.json()
 
-    if(body.result == true){
+    if(body.result === true){
       props.addToken(body.token)
       setUserExists(true)
       
@@ -47,7 +47,7 @@ function ScreenHome(props) {
 
     const body = await data.json()
 
-    if(body.result == true){
+    if(body.result === true){
       props.addToken(body.token)
       setUserExists(true)
       
