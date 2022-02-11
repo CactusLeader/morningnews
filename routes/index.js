@@ -4,7 +4,8 @@ var router = express.Router();
 var uid2 = require('uid2')
 var bcrypt = require('bcrypt');
 
-var userModel = require('../models/users')
+var userModel = require('../models/users');
+const req = require('express/lib/request');
 
 
 router.post('/sign-up', async function(req,res,next){
@@ -38,6 +39,7 @@ router.post('/sign-up', async function(req,res,next){
       email: req.body.emailFromFront,
       password: hash,
       token: uid2(32),
+      language: 'fr'
     })
   
     saveUser = await newUser.save()
@@ -86,10 +88,40 @@ router.post('/sign-in', async function(req,res,next){
     }
   }
   
-
   res.json({result, user, error, token})
 
+})
 
+router.put('/language', async (req, res, next) => {
+    
+  console.log('req.body.token', req.body.token)
+  console.log('req.body.language', req.body.language)
+  const language = req.body.language;
+  const token = req.body.token;
+
+  await userModel.updateOne(
+    { token: token},
+    { language: language }
+   ); 
+
+  res.json({ result: true });
+})
+
+router.post('/user-language', async (req, res, next) => {
+
+  const user = await userModel.findOne( { token: req.body.token } );
+  console.log(user)
+
+  let langue = null;
+
+  if(user) {
+    result = true;
+    langue = user.language
+  } else {
+    result = false;
+  }
+
+  res.json({ result, langue });
 })
 
 module.exports = router;

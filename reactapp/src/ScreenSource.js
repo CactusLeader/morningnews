@@ -9,10 +9,43 @@ function ScreenSource(props) {
 
   const [sourceList, setSourceList] = useState([])
   const [selectedLang, setSelectedLang] = useState(props.selectedLang)
-
+  console.log('after declaration', selectedLang)
 
   useEffect(() => {
     const APIResultsLoading = async() => {
+      const lastSessionLanguage = await fetch('/user-language', {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded'},
+        body: `token=${props.token}`
+      });
+      const resLastSessionLanguage = await lastSessionLanguage.json();
+      console.log('resLastSessionLanguage', resLastSessionLanguage);
+
+      if(resLastSessionLanguage.result) {
+
+      var langue = 'fr'
+      var country = 'fr'
+        
+      if(resLastSessionLanguage.langue == 'en'){
+        var langue = 'en'
+        var country = 'us'
+      }
+      
+      props.changeLang(selectedLang)
+      const url = 'https://newsapi.org/v2/top-headlines/sources?' +
+      `language=${langue}&` +
+      `country=${country}&` +
+      'apiKey=ae98ebaa4a2f49eab9851d85382ead9a';
+      const data = await fetch(url)
+      const body = await data.json()
+      setSourceList(body.sources)
+      }
+    }
+    APIResultsLoading()
+  }, [])
+
+  useEffect(() => {
+    const newsUpdate = async() => {
       var langue = 'fr'
       var country = 'fr'
         
@@ -20,6 +53,7 @@ function ScreenSource(props) {
         var langue = 'en'
         var country = 'us'
       }
+
       props.changeLang(selectedLang)
       const url = 'https://newsapi.org/v2/top-headlines/sources?' +
       `language=${langue}&` +
@@ -29,17 +63,26 @@ function ScreenSource(props) {
       const body = await data.json()
       setSourceList(body.sources)
     }
-
-    APIResultsLoading()
+    newsUpdate(); 
   }, [selectedLang])
+
+  const handleChangeLang = async (langue) => {
+    setSelectedLang(langue);
+    const userLanguage = await fetch('/language', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `language=${langue}&token=${props.token}`
+    });
+    console.log('selectedLang', selectedLang)
+  }
 
   return (
     <div>
         <Nav/>
        
        <div style={{display:'flex', justifyContent:'center', alignItems:'center'}} className="Banner">
-          <img style={{width:'40px', margin:'10px',cursor:'pointer'}} src='/images/fr.png' onClick={() => setSelectedLang('fr')} />
-          <img style={{width:'40px', margin:'10px',cursor:'pointer'}} src='/images/uk.png' onClick={() => setSelectedLang('en')} /> 
+          <img style={{width:'40px', margin:'10px',cursor:'pointer'}} src='/images/fr.png' onClick={() => handleChangeLang('fr')} />
+          <img style={{width:'40px', margin:'10px',cursor:'pointer'}} src='/images/uk.png' onClick={() => handleChangeLang('en')} /> 
         </div>
 
        <div className="HomeThemes">
@@ -66,7 +109,7 @@ function ScreenSource(props) {
 }
 
 function mapStateToProps(state){
-  return {selectedLang: state.selectedLang}
+  return {selectedLang: state.selectedLang, token: state.token}
 }
 
 function mapDispatchToProps(dispatch){
